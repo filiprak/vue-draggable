@@ -1,3 +1,8 @@
+_ikolExport('@ikol/src/common/directives/draggable', [
+    'vue'
+], function (
+    Vue
+) {
     'use-strict';
     
     /* eslint-disable-next-line ik-check-case */
@@ -30,10 +35,10 @@
             const moveStart = function (event) {
                 const data = el[DATA_KEY];
                 const rect = el.getBoundingClientRect();
-                const offset = getMousePosition(event);
+                const position = getMousePosition(event);
                 
-                data.top_offset = offset.top - rect.top;
-                data.left_offset = offset.left - rect.left;
+                data.top_offset = position.top - rect.top;
+                data.left_offset = position.left - rect.left;
                 
                 if (data.dragged_el) {
                     data.dragged_el.remove();
@@ -71,12 +76,7 @@
                     data.dragged_el.style.left = dragged_x;
                     data.dragged_el.style.top = dragged_y;
                     
-                    const dragged_rect = data.dragged_el.getBoundingClientRect();
-                    
-                    const snap_x = dragged_x + dragged_rect.width / 2;
-                    const snap_y = dragged_y + 30;
-                    
-                    detectDropTarget(snap_x, snap_y);
+                    detectDropTarget(position.left, position.top);
                 }
             };
             
@@ -97,6 +97,8 @@
                     data.ghost_el.remove();
                 }
                 
+                data.target_el = null;
+                
                 el.style.display = data.original_display;
                 
                 Evt.$emit(EVT_DRAG_END, data);
@@ -104,7 +106,6 @@
             
             function dropTargetEnter(drop_target_el) {
                 const data = el[DATA_KEY];
-                const rect = drop_target_el.getBoundingClientRect();
                 drop_target_el.appendChild(data.ghost_el);
             }
             
@@ -114,10 +115,16 @@
             
             function detectDropTarget(mouse_x, mouse_y) {
                 const data = el[DATA_KEY];
+                const dragged_el = data.dragged_el;
+                
+                const hit_x = mouse_x - data.left_offset + dragged_el.getBoundingClientRect().width / 2;
+                const hit_y = mouse_y - data.top_offset;
                 
                 data.dragged_el.hidden = true;
                 data.ghost_el.hidden = true;
-                let mouse_el = document.elementFromPoint(mouse_x, mouse_y);
+                let mouse_el = document.elementFromPoint(hit_x, hit_y);
+                /*console.log('mouse_el', mouse_el)
+                console.log('drop_target_el', data.target_el)*/
                 data.dragged_el.hidden = false;
                 data.ghost_el.hidden = false;
                 
@@ -136,6 +143,7 @@
                             current_node = current_node.parentElement;
                         }
                         
+                        
                         if (drop_target_el) {
                             if (data.target_el) {
                                 dropTargetLeave(data.target_el);
@@ -144,6 +152,11 @@
                             dropTargetEnter(drop_target_el);
                         }
                         
+                    }
+                    
+                    if (data.target_el) {
+                        const target_top = hit_y - data.target_el.getBoundingClientRect().top;
+                        data.ghost_el.style.top = target_top - target_top % 15;
                     }
                 }
             }
@@ -228,3 +241,5 @@
     });
     
     return config;
+    
+}, typeof module !== 'undefined' ? module : {});
