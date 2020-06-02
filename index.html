@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="draggable.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+            background: lightgray;
+        }
+
+        body {
+            padding: 30px;
+        }
+
+        #root {
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        .drag-container {
+            background: whitesmoke;
+            height: 100%;
+            width: 250px;
+            padding: 5px;
+            position: relative;
+        }
+
+        .drag-container > div {
+            margin-bottom: 5px;
+        }
+
+        .item {
+            padding: 15px;
+            background: orange;
+        }
+    </style>
+</head>
+<body>
+<div id="root">
+    <div v-drop-target="{}" class="drag-container">
+        <div class="item" v-draggable>Draggable 1</div>
+        <div class="item" v-draggable>Draggable 2</div>
+        <div class="item" v-draggable>Draggable 3</div>
+    </div>
+</div>
+
+<script>
+    new Vue({el: '#root'});
+</script>
+</body>
+</html>
