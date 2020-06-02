@@ -45,6 +45,11 @@
         return (rect.top + rect.height / 2 >= y);
     }
 
+    function isPointInsideElement(el, x, y) {
+        const rect = el.getBoundingClientRect();
+        return y < rect.bottom && y > rect.top;
+    }
+
     function swapElements(el1, el2) {
         const parent1 = el1.parentNode;
         const sibling1 = el1.nextSibling === el2 ? el1 : el1.nextSibling;
@@ -112,7 +117,6 @@
                 if (data.dragged_el) {
                     const dragged_x = position.left - data.left_offset;
                     const dragged_y = position.top - data.top_offset;
-                    console.log(dragged_x, dragged_y)
 
                     data.dragged_el.style.left = pixels(dragged_x);
                     data.dragged_el.style.top = pixels(dragged_y);
@@ -220,13 +224,21 @@
                     // sorting elements
                     if (data.target_el) {
                         if (!data.target_el[DATA_DROP_TARGET_KEY].absolute) {
-                            const prev_el = data.ghost_el.previousElementSibling;
-                            const next_el = data.ghost_el.nextElementSibling;
+                            let prev_el = data.ghost_el.previousElementSibling;
+                            let next_el = data.ghost_el.nextElementSibling;
 
-                            if (prev_el && isElementAbovePoint(prev_el, mouse_x, mouse_y)) {
+                            while (prev_el === data.dragged_el || prev_el === el) {
+                                prev_el = prev_el.previousElementSibling;
+                            }
+
+                            while (next_el === data.dragged_el || next_el === el) {
+                                next_el = next_el.nextElementSibling;
+                            }
+
+                            if (prev_el && isPointInsideElement(prev_el, mouse_x, mouse_y)) {
                                 //swapElements(data.ghost_el, data.dragged_el);
-                                swapElements(data.ghost_el, prev_el);
-                            } else if (next_el && isElementBelowPoint(next_el, mouse_x, mouse_y)) {
+                                swapElements(prev_el, data.ghost_el);
+                            } else if (next_el && isPointInsideElement(next_el, mouse_x, mouse_y)) {
                                 swapElements(next_el, data.ghost_el);
                                 //swapElements(next_el, data.dragged_el);
                             }
